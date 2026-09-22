@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JT Performance Portal</title>
   
-  <!-- PWA Manifest & Theme -->
+  <!-- PWA Manifest & Mobile Theme -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Chart.js CDN for Analytics -->
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -61,9 +61,9 @@
       font-size: 0.9rem;
     }
 
-    /* Tab Navigation Styling */
+    /* Tab Navigation Styles */
     nav.nav-bar {
-      display: flex !important;
+      display: flex;
       width: 100%;
       max-width: 800px;
       gap: 8px;
@@ -97,7 +97,7 @@
       max-width: 800px;
     }
 
-    /* Tab Content Visibility */
+    /* Tab View Logic */
     .tab-content {
       display: none;
     }
@@ -201,7 +201,7 @@
     <p class="subtitle">Phase 1: Foundation — Unified Multi-Tab Dashboard</p>
   </header>
 
-  <!-- NAVIGATION TABS -->
+  <!-- NAVIGATION BAR -->
   <nav class="nav-bar">
     <button class="nav-btn active" onclick="switchTab('log-tab', this)">Log Workout</button>
     <button class="nav-btn" onclick="switchTab('analytics-tab', this)">Analytics</button>
@@ -217,14 +217,26 @@
         <h2>Log Workout Session</h2>
         <form id="workoutForm" onsubmit="handleWorkoutSubmit(event)">
           <div style="margin-bottom: 12px;">
-            <label for="logExercise">Exercise Movement:</label>
+            <label for="logExercise">Movement Pattern / Exercise:</label>
             <select id="logExercise" required>
-              <option value="Romanian Deadlift">Romanian Deadlift (DB/BB)</option>
-              <option value="Goblet Box Squat">Goblet Box Squat</option>
-              <option value="Dumbbell Neutral Press">Dumbbell Neutral Press</option>
-              <option value="Single-Arm DB Row">Single-Arm DB Row</option>
-              <option value="Bulgarian Split Squat">Bulgarian Split Squat</option>
-              <option value="Reverse Lunge">Reverse Lunge</option>
+              <optgroup label="Lower Body (Joint-Friendly)">
+                <option value="Romanian Deadlift">Romanian Deadlift (DB/BB)</option>
+                <option value="Goblet Box Squat">Goblet Box Squat</option>
+                <option value="Bulgarian Split Squat">Bulgarian Split Squat</option>
+                <option value="Reverse Lunge">Reverse Lunge</option>
+                <option value="Step-Up (Controlled)">Controlled Step-Up</option>
+                <option value="Leg Press (Neutral Footing)">Leg Press (Controlled Range)</option>
+              </optgroup>
+              <optgroup label="Upper Body">
+                <option value="Dumbbell Neutral Press">Dumbbell Neutral Incline/Flat Press</option>
+                <option value="Single-Arm DB Row">Single-Arm DB Row</option>
+                <option value="Lat Pulldown / Cable Row">Lat Pulldown / Cable Row</option>
+                <option value="Push-Up (Controlled Tempo)">Push-Up (Controlled Tempo)</option>
+              </optgroup>
+              <optgroup label="Core & Posterior Chain">
+                <option value="Glute Bridge / Thrust">Glute Bridge / Hip Thrust</option>
+                <option value="Ab Wheel / Paloff Press">Pallof Press / Core Hold</option>
+              </optgroup>
             </select>
           </div>
 
@@ -239,6 +251,11 @@
             </div>
           </div>
 
+          <div style="margin-bottom: 12px;">
+            <label for="logRPE">Perceived Effort / Notes (Optional):</label>
+            <input type="text" id="logNotes" placeholder="e.g. RPE 8, zero knee discomfort">
+          </div>
+
           <button type="submit" class="action-btn">Save Session to Cloud</button>
         </form>
       </section>
@@ -249,7 +266,7 @@
       <section class="card">
         <h2>Performance Trends</h2>
         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Track top working weight and safe Estimated 1RM ($Weight \times (1 + \frac{Reps}{30})$) over time.
+          Track working load and safe Estimated 1RM ($Weight \times (1 + \frac{Reps}{30})$) progression over time.
         </p>
 
         <div>
@@ -274,7 +291,7 @@
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Top Weight</th>
+                <th>Top Load</th>
                 <th>Reps</th>
                 <th>Est. 1RM</th>
               </tr>
@@ -290,20 +307,33 @@
     <!-- TAB 3: NUTRITION & MACROS -->
     <div id="macros-tab" class="tab-content">
       <section class="card">
-        <h2>Nutrition & Macro Targets</h2>
+        <h2>Nutrition & Hydration Guidelines</h2>
         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Flexible habit-first nutrition targets to support body composition and muscle recovery.
+          Sustainable daily habit targets to support joint health, recovery, and body composition.
         </p>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px;">
           <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
             <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Daily Protein Target</span>
             <strong style="color: var(--primary); font-size: 1.25rem;">200 - 210g</strong>
           </div>
           <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
-            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Hydration Target</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Daily Hydration</span>
             <strong style="color: var(--accent-green); font-size: 1.25rem;">100+ oz</strong>
           </div>
+          <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Creatine Monohydrate</span>
+            <strong style="color: var(--primary); font-size: 1.25rem;">5g / Day</strong>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+          <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 8px;">Habit Principles</h3>
+          <ul style="color: var(--text-muted); font-size: 0.875rem; padding-left: 20px; line-height: 1.6;">
+            <li>Prioritize whole protein sources (lean meats, eggs, Greek yogurt) across 3–4 meals.</li>
+            <li>Maintain flexible weekend habits—consistency over 80% of the week yields 100% of results.</li>
+            <li>Prioritize daily hydration to support joint lubrication and creatine cellular absorption.</li>
+          </ul>
         </div>
       </section>
     </div>
@@ -311,9 +341,9 @@
     <!-- TAB 4: SESSION HISTORY -->
     <div id="history-tab" class="tab-content">
       <section class="card">
-        <h2>Full Session Logs</h2>
+        <h2>Full Cloud Session Logs</h2>
         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Recent workout records pulled straight from Cloud Firestore.
+          Complete historical workout records synchronized with Cloud Firestore.
         </p>
         <div class="table-container">
           <table>
@@ -321,11 +351,12 @@
               <tr>
                 <th>Date</th>
                 <th>Exercise</th>
-                <th>Load & Reps</th>
+                <th>Load & Performance</th>
+                <th>Notes</th>
               </tr>
             </thead>
             <tbody id="fullHistoryTableBody">
-              <!-- Full logs rendered here -->
+              <!-- Dynamic Rows -->
             </tbody>
           </table>
         </div>
@@ -356,20 +387,17 @@
 
     let performanceChart = null;
 
-    // Tab Switching Function
+    // Strict Tab Switching Function
     function switchTab(tabId, btnElement) {
-      // Hide all tabs
       const tabs = document.querySelectorAll('.tab-content');
       tabs.forEach(tab => {
         tab.style.display = 'none';
         tab.classList.remove('active');
       });
 
-      // Deactivate all nav buttons
       const buttons = document.querySelectorAll('.nav-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
 
-      // Show the selected tab explicitly
       const targetTab = document.getElementById(tabId);
       if (targetTab) {
         targetTab.style.display = 'block';
@@ -380,7 +408,6 @@
         btnElement.classList.add('active');
       }
 
-      // Trigger data loads
       if (tabId === 'analytics-tab') {
         renderExerciseTrend();
       } else if (tabId === 'history-tab') {
@@ -395,12 +422,13 @@
       return Math.round(Number(weight) * (1 + Number(reps) / 30));
     }
 
-    // Submit Workout Session
+    // Submit Workout Session to Firestore
     async function handleWorkoutSubmit(e) {
       e.preventDefault();
       const exerciseName = document.getElementById('logExercise').value;
       const weight = Number(document.getElementById('logWeight').value);
       const reps = Number(document.getElementById('logReps').value);
+      const notes = document.getElementById('logNotes').value || '';
 
       try {
         await db.collection("workout_history").add({
@@ -408,20 +436,21 @@
           exercises: [
             {
               name: exerciseName,
-              sets: [{ weight: weight, reps: reps }]
+              sets: [{ weight: weight, reps: reps }],
+              notes: notes
             }
           ]
         });
 
-        alert("Workout logged successfully!");
+        alert("Workout successfully saved to cloud!");
         document.getElementById('workoutForm').reset();
       } catch (err) {
         console.error("Error logging workout: ", err);
-        alert("Failed to log workout: " + err.message);
+        alert("Failed to save workout: " + err.message);
       }
     }
 
-    // Render Analytics Chart
+    // Render Analytics Chart and Log
     async function renderExerciseTrend() {
       const selectedExercise = document.getElementById('exerciseSelect').value;
       const historyTableBody = document.getElementById('historyTableBody');
@@ -538,11 +567,13 @@
 
           data.exercises.forEach(ex => {
             const setStr = ex.sets.map(s => `${s.weight} lbs x ${s.reps} reps`).join(', ');
+            const notes = ex.notes || '-';
             const row = `
               <tr>
                 <td>${dateStr}</td>
                 <td style="color: var(--primary); font-weight: bold;">${ex.name}</td>
                 <td>${setStr}</td>
+                <td style="color: var(--text-muted); font-size: 0.85rem;">${notes}</td>
               </tr>
             `;
             fullHistoryTableBody.innerHTML += row;
