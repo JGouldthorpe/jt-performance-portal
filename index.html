@@ -61,7 +61,7 @@
       font-size: 0.9rem;
     }
 
-    /* Navigation Bar */
+    /* Tab Navigation Styles */
     nav {
       display: flex;
       width: 100%;
@@ -73,7 +73,7 @@
 
     .nav-btn {
       flex: 1;
-      padding: 10px 14px;
+      padding: 12px 14px;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
@@ -87,24 +87,22 @@
 
     .nav-btn.active {
       background: var(--primary-hover);
-      color: white;
+      color: #ffffff;
       border-color: var(--primary);
     }
 
     .container {
       width: 100%;
       max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
     }
 
+    /* Tab Display Logic */
     .tab-content {
       display: none;
     }
 
     .tab-content.active {
-      display: block;
+      display: block !important;
     }
 
     .card {
@@ -199,10 +197,10 @@
 
   <header>
     <h1>JT Performance Portal</h1>
-    <p class="subtitle">Phase 1: Foundation — Unified Cloud Dashboard</p>
+    <p class="subtitle">Phase 1: Foundation — Unified Multi-Tab Dashboard</p>
   </header>
 
-  <!-- Navigation Menu -->
+  <!-- Navigation Menu Bar -->
   <nav>
     <button class="nav-btn active" onclick="switchTab('log-tab', this)">Log Workout</button>
     <button class="nav-btn" onclick="switchTab('analytics-tab', this)">Analytics</button>
@@ -212,7 +210,7 @@
 
   <main class="container">
     
-    <!-- TAB 1: LOG WORKOUT -->
+    <!-- PAGE 1 / TAB 1: LOG WORKOUT -->
     <div id="log-tab" class="tab-content active">
       <section class="card">
         <h2>Log Workout Session</h2>
@@ -245,7 +243,7 @@
       </section>
     </div>
 
-    <!-- TAB 2: ANALYTICS -->
+    <!-- PAGE 2 / TAB 2: ANALYTICS -->
     <div id="analytics-tab" class="tab-content">
       <section class="card">
         <h2>Performance Trends</h2>
@@ -288,12 +286,12 @@
       </section>
     </div>
 
-    <!-- TAB 3: NUTRITION & MACROS -->
+    <!-- PAGE 3 / TAB 3: NUTRITION & MACROS -->
     <div id="macros-tab" class="tab-content">
       <section class="card">
         <h2>Nutrition & Macro Targets</h2>
         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Flexible habit-first nutrition targets to support body composition and muscle recovery.
+          Flexible habit-first nutrition targets to support body composition and recovery.
         </p>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;">
@@ -309,7 +307,7 @@
       </section>
     </div>
 
-    <!-- TAB 4: SESSION HISTORY -->
+    <!-- PAGE 4 / TAB 4: SESSION HISTORY -->
     <div id="history-tab" class="tab-content">
       <section class="card">
         <h2>Full Session Logs</h2>
@@ -335,7 +333,7 @@
 
   </main>
 
-  <!-- Firebase Compat SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -357,14 +355,21 @@
 
     let performanceChart = null;
 
-    // Tab Navigation Logic
+    // Switch Tabs Function
     function switchTab(tabId, btnElement) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-      
+      // Hide all tabs
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+
+      // Deactivate all nav buttons
+      const buttons = document.querySelectorAll('.nav-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      // Show selected tab and activate button
       document.getElementById(tabId).classList.add('active');
       btnElement.classList.add('active');
 
+      // Trigger dynamic data load based on tab
       if (tabId === 'analytics-tab') {
         renderExerciseTrend();
       } else if (tabId === 'history-tab') {
@@ -405,7 +410,7 @@
       }
     }
 
-    // Render Analytics Chart and Exercise Table
+    // Render Analytics Chart
     async function renderExerciseTrend() {
       const selectedExercise = document.getElementById('exerciseSelect').value;
       const historyTableBody = document.getElementById('historyTableBody');
@@ -502,7 +507,7 @@
       }
     }
 
-    // Render Full Raw Log History
+    // Render Full History Log
     async function renderFullHistory() {
       const fullHistoryTableBody = document.getElementById('fullHistoryTableBody');
       fullHistoryTableBody.innerHTML = '';
@@ -537,7 +542,7 @@
       }
     }
 
-    // Initialize PWA Service Worker
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
