@@ -61,9 +61,9 @@
       font-size: 0.9rem;
     }
 
-    /* Tab Navigation Styles */
-    nav {
-      display: flex;
+    /* Tab Navigation Styling */
+    nav.nav-bar {
+      display: flex !important;
       width: 100%;
       max-width: 800px;
       gap: 8px;
@@ -83,6 +83,7 @@
       font-size: 0.9rem;
       white-space: nowrap;
       text-align: center;
+      transition: all 0.2s ease;
     }
 
     .nav-btn.active {
@@ -96,7 +97,7 @@
       max-width: 800px;
     }
 
-    /* Tab Display Logic */
+    /* Tab Content Visibility */
     .tab-content {
       display: none;
     }
@@ -200,8 +201,8 @@
     <p class="subtitle">Phase 1: Foundation — Unified Multi-Tab Dashboard</p>
   </header>
 
-  <!-- Navigation Menu Bar -->
-  <nav>
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-bar">
     <button class="nav-btn active" onclick="switchTab('log-tab', this)">Log Workout</button>
     <button class="nav-btn" onclick="switchTab('analytics-tab', this)">Analytics</button>
     <button class="nav-btn" onclick="switchTab('macros-tab', this)">Nutrition & Macros</button>
@@ -210,7 +211,7 @@
 
   <main class="container">
     
-    <!-- PAGE 1 / TAB 1: LOG WORKOUT -->
+    <!-- TAB 1: LOG WORKOUT -->
     <div id="log-tab" class="tab-content active">
       <section class="card">
         <h2>Log Workout Session</h2>
@@ -243,7 +244,7 @@
       </section>
     </div>
 
-    <!-- PAGE 2 / TAB 2: ANALYTICS -->
+    <!-- TAB 2: ANALYTICS -->
     <div id="analytics-tab" class="tab-content">
       <section class="card">
         <h2>Performance Trends</h2>
@@ -286,28 +287,28 @@
       </section>
     </div>
 
-    <!-- PAGE 3 / TAB 3: NUTRITION & MACROS -->
+    <!-- TAB 3: NUTRITION & MACROS -->
     <div id="macros-tab" class="tab-content">
       <section class="card">
         <h2>Nutrition & Macro Targets</h2>
         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">
-          Flexible habit-first nutrition targets to support body composition and recovery.
+          Flexible habit-first nutrition targets to support body composition and muscle recovery.
         </p>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;">
           <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
-            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Daily Protein</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Daily Protein Target</span>
             <strong style="color: var(--primary); font-size: 1.25rem;">200 - 210g</strong>
           </div>
           <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color);">
-            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Hydration Goal</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem; display: block;">Hydration Target</span>
             <strong style="color: var(--accent-green); font-size: 1.25rem;">100+ oz</strong>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- PAGE 4 / TAB 4: SESSION HISTORY -->
+    <!-- TAB 4: SESSION HISTORY -->
     <div id="history-tab" class="tab-content">
       <section class="card">
         <h2>Full Session Logs</h2>
@@ -355,21 +356,31 @@
 
     let performanceChart = null;
 
-    // Switch Tabs Function
+    // Tab Switching Function
     function switchTab(tabId, btnElement) {
       // Hide all tabs
       const tabs = document.querySelectorAll('.tab-content');
-      tabs.forEach(tab => tab.classList.remove('active'));
+      tabs.forEach(tab => {
+        tab.style.display = 'none';
+        tab.classList.remove('active');
+      });
 
       // Deactivate all nav buttons
       const buttons = document.querySelectorAll('.nav-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
 
-      // Show selected tab and activate button
-      document.getElementById(tabId).classList.add('active');
-      btnElement.classList.add('active');
+      // Show the selected tab explicitly
+      const targetTab = document.getElementById(tabId);
+      if (targetTab) {
+        targetTab.style.display = 'block';
+        targetTab.classList.add('active');
+      }
+      
+      if (btnElement) {
+        btnElement.classList.add('active');
+      }
 
-      // Trigger dynamic data load based on tab
+      // Trigger data loads
       if (tabId === 'analytics-tab') {
         renderExerciseTrend();
       } else if (tabId === 'history-tab') {
