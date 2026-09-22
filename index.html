@@ -1,821 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JT Performance & Health Portal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JT Performance Portal</title>
+  
+  <!-- PWA Manifest & Theme -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Chart.js CDN for Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
-      --bg-color: #0f172a;
+      --bg-dark: #0f172a;
       --card-bg: #1e293b;
-      --accent: #38bdf8;
-      --partner-accent: #38bdf8;
-      --text: #f8fafc;
+      --border-color: #334155;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --border: #334155;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent-green: #4ade80;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-color); color: var(--text);
-      margin: 0; padding: 16px; display: flex; justify-content: center;
-    }
-    .app-container { width: 100%; max-width: 680px; }
-    header { border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; }
-    h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
-    .subtitle { margin: 4px 0 0; color: var(--text-muted); font-size: 0.875rem; }
-    
-    .nav-tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
-    .nav-tab {
-      flex: 1; min-width: 60px; padding: 10px 4px; text-align: center; background: var(--card-bg);
-      border: 1px solid var(--border); border-radius: 6px; color: var(--text);
-      font-weight: bold; cursor: pointer; font-size: 0.72rem;
-    }
-    .nav-tab.active { background: var(--accent); color: #0f172a; }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
     .card {
-      background: var(--card-bg); border-radius: 8px; padding: 16px;
-      margin-bottom: 16px; border: 1px solid var(--border);
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     }
-    .card h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    
-    label { display: block; margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); }
-    input, select, textarea {
-      width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px;
-      border: 1px solid var(--border); background: #0f172a; color: var(--text);
-      box-sizing: border-box; font-family: inherit;
+
+    h2 {
+      font-size: 1.25rem;
+      color: var(--primary);
+      margin-bottom: 12px;
     }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 6px;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-size: 1rem;
+      outline: none;
+    }
+
     button {
-      width: 100%; background: var(--accent); color: #0f172a; border: none;
-      padding: 10px; font-weight: bold; border-radius: 4px; margin-top: 12px; cursor: pointer;
+      background-color: var(--primary-hover);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-top: 10px;
     }
-    .btn-secondary { background: var(--success); color: #fff; margin-top: 6px; padding: 6px 10px; font-size: 0.75rem; }
-    .btn-danger { background: var(--danger); color: #fff; margin-top: 6px; padding: 6px 10px; font-size: 0.75rem; }
 
-    .exercise-group { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
-    .exercise-title { font-weight: bold; font-size: 0.95rem; color: var(--accent); }
-    .exercise-notes { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-    
-    .person-header { font-size: 0.8rem; font-weight: bold; margin-top: 8px; margin-bottom: 4px; padding-bottom: 2px; border-bottom: 1px dashed var(--border); }
-    .person-jt { color: var(--accent); }
-    .person-partner { color: #f472b6; }
+    button:hover {
+      background-color: var(--primary);
+    }
 
-    .log-item { border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 12px; font-size: 0.85rem; }
-    .log-date { font-weight: bold; color: var(--text-muted); }
-    .item-card { margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .tag { display: inline-block; background: #0369a1; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px; }
-    .tag-green { background: #15803d; }
-    .tag-purple { background: #6b21a8; }
-    .tag-warn { background: #b45309; }
-    .tag-partner { background: #db2777; }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      margin: 20px 0;
+    }
 
-    .muscle-interactive-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 16px; }
-    .muscle-zone { fill: #0f172a; stroke: var(--accent); stroke-width: 1.5; cursor: pointer; transition: fill 0.2s; }
-    .muscle-zone:hover { fill: #0284c7; }
-    .muscle-label { fill: #f8fafc; font-size: 10px; font-weight: bold; pointer-events: none; text-anchor: middle; }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 10px;
+    }
 
-    .macro-display { display: flex; justify-content: space-between; gap: 8px; margin-top: 16px; }
-    .macro-box { background: #0f172a; border: 1px solid var(--border); padding: 12px 6px; border-radius: 6px; flex: 1; text-align: center; }
-    .macro-val { font-size: 1.15rem; font-weight: bold; color: var(--accent); }
-    .macro-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
 
-    .muscle-card { background: #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
-    .muscle-name { color: var(--accent); font-weight: bold; font-size: 1rem; }
-    .muscle-location { font-size: 0.75rem; color: var(--warning); margin-bottom: 6px; }
+    th {
+      color: var(--text-muted);
+      border-bottom: 2px solid var(--border-color);
+      padding: 10px 8px;
+    }
+
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .weight-col {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .e1rm-col {
+      color: var(--accent-green);
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <header>
-      <h1>JT Performance Portal</h1>
-      <p class="subtitle">Strength, Knee Integrity & Clean Nutrition</p>
-    </header>
 
-    <div class="nav-tabs">
-      <div class="nav-tab active" onclick="switchTab('workout-tab', this)">Workouts</div>
-      <div class="nav-tab" onclick="switchTab('partner-tab', this)">Partner Workouts</div>
-      <div class="nav-tab" onclick="switchTab('muscle-tab', this)">Muscle Map</div>
-      <div class="nav-tab" onclick="switchTab('swap-tab', this)">Swap Engine</div>
-      <div class="nav-tab" onclick="switchTab('ideas-tab', this)">💡 Staging</div>
-      <div class="nav-tab" onclick="switchTab('nutrition-tab', this)">Clean Food</div>
-      <div class="nav-tab" onclick="switchTab('macro-tab', this)">Macros</div>
-      <div class="nav-tab" onclick="switchTab('library-tab', this)">Tech Search</div>
-      <div class="nav-tab" onclick="switchTab('history-tab', this)">Analytics</div>
-    </div>
+  <header>
+    <h1>JT Performance Portal</h1>
+    <p class="subtitle">Phase 1: Foundation — Cloud Sync & Movement Analytics</p>
+  </header>
 
-    <!-- WORKOUT TAB -->
-    <div id="workout-tab" class="tab-content active">
-      <div class="card">
-        <h2>1. Session Selector</h2>
-        <label for="workout-select">Select Routine</label>
-        <select id="workout-select" onchange="renderWorkout()">
-          <optgroup label="Arnold Split (Joint-Friendly Hypertrophy)">
-            <option value="arnold_chest_back">Arnold Split — Chest & Back (Antagonist Volume)</option>
-            <option value="arnold_shoulders_arms">Arnold Split — Shoulders & Arms (Delts, Biceps & Triceps)</option>
-            <option value="arnold_legs_core">Arnold Split — Legs & Core (Low Impact & Posterior Chain)</option>
-          </optgroup>
-          <optgroup label="JT's Restart Program (Home Gym Upper/Lower)">
-            <option value="restart_d1">Day 1 — Upper Strength (Push + Pull Heavy)</option>
-            <option value="restart_d2">Day 2 — Lower Strength (Hinge + Unilateral)</option>
-            <option value="restart_d4">Day 4 — Upper Hypertrophy (Volume & Pump)</option>
-            <option value="restart_d5">Day 5 — Lower Hypertrophy (Glutes & Stability)</option>
-          </optgroup>
-          <optgroup label="Targeted Muscle & Conditioning Focus">
-            <option value="quad_knee">Lower Body A: Quad Definition & Knee Stability</option>
-            <option value="glute_posterior">Lower Body B: Glute Mass & Posterior Chain</option>
-            <option value="push_pull">Push / Pull Hypertrophy Focus</option>
-            <option value="arm_blaster">Arm Blaster: Bicep & Tricep Peak</option>
-            <option value="bootcamp">High-Intensity Bootcamp Conditioning</option>
-            <option value="stretch_yoga">Dynamic Mobility & Yoga Restorative</option>
-          </optgroup>
+  <main class="container">
+    
+    <!-- Quick Entry Section -->
+    <section class="card">
+      <h2>Log Workout Session</h2>
+      <form id="workoutForm" onsubmit="handleWorkoutSubmit(event)">
+        <div style="margin-bottom: 12px;">
+          <label for="logExercise">Exercise Movement:</label>
+          <select id="logExercise" required>
+            <option value="Romanian Deadlift">Romanian Deadlift (DB/BB)</option>
+            <option value="Goblet Box Squat">Goblet Box Squat</option>
+            <option value="Dumbbell Neutral Press">Dumbbell Neutral Press</option>
+            <option value="Single-Arm DB Row">Single-Arm DB Row</option>
+            <option value="Bulgarian Split Squat">Bulgarian Split Squat</option>
+            <option value="Reverse Lunge">Reverse Lunge</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label for="logWeight">Top Weight (lbs):</label>
+            <input type="number" id="logWeight" placeholder="e.g. 185" required min="0">
+          </div>
+          <div style="flex: 1;">
+            <label for="logReps">Reps Completed:</label>
+            <input type="number" id="logReps" placeholder="e.g. 10" required min="1">
+          </div>
+        </div>
+
+        <button type="submit">Save Session to Cloud</button>
+      </form>
+    </section>
+
+    <!-- Movement Analytics Section -->
+    <section class="card">
+      <h2>Performance Trends</h2>
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">
+        Track top working weight and safe Estimated 1RM ($Weight \times (1 + \frac{Reps}{30})$) over time.
+      </p>
+
+      <div>
+        <label for="exerciseSelect">Select Movement Trend:</label>
+        <select id="exerciseSelect" onchange="renderExerciseTrend()">
+          <option value="Romanian Deadlift">Romanian Deadlift (DB/BB)</option>
+          <option value="Goblet Box Squat">Goblet Box Squat</option>
+          <option value="Dumbbell Neutral Press">Dumbbell Neutral Press</option>
+          <option value="Single-Arm DB Row">Single-Arm DB Row</option>
+          <option value="Bulgarian Split Squat">Bulgarian Split Squat</option>
+          <option value="Reverse Lunge">Reverse Lunge</option>
         </select>
-
-        <label for="energy-status">Session Energy / Time Limit</label>
-        <select id="energy-status" onchange="renderWorkout()">
-          <option value="normal">Full Session (40-50 Min)</option>
-          <option value="condensed">Condensed / Busy (20-30 Min - Main Lifts Only)</option>
-        </select>
       </div>
 
-      <div class="card">
-        <h2>2. Workout Execution</h2>
-        <div id="workout-content"></div>
-        <label for="joint-feedback">Joint & Knee Stability Notes</label>
-        <input type="text" id="joint-feedback" placeholder="e.g., Knees felt smooth on lunges, zero lower back pinch" />
-        <button onclick="saveWorkout()">Log Workout Session</button>
-      </div>
-    </div>
-
-    <!-- PARTNER TAB -->
-    <div id="partner-tab" class="tab-content">
-      <div class="card">
-        <h2>Partner Strength & Conditioning Routines</h2>
-        <div class="grid-2">
-          <div>
-            <label for="partner-name">Partner Identifier</label>
-            <input type="text" id="partner-name" value="Partner" onchange="renderPartnerWorkout()" placeholder="e.g. Partner, Wife, Friend" />
-          </div>
-          <div>
-            <label for="partner-select">Select Guided Routine</label>
-            <select id="partner-select" onchange="renderPartnerWorkout()">
-              <option value="partner_burn">Sweaty Partner Burn (Teamwork & High Cardio)</option>
-              <option value="partner_foundations">Big 4 Foundations (Deadlift, Bench, Dip, Pull-Up)</option>
-              <option value="partner_upper_lower">Upper/Lower Hypertrophy Partner Circuit</option>
-            </select>
-          </div>
-        </div>
+      <div class="chart-container">
+        <canvas id="trendChart"></canvas>
       </div>
 
-      <div class="card">
-        <h2>Session Execution & Data Entry</h2>
-        <div id="partner-workout-content"></div>
-        <label for="partner-joint-feedback">Session Notes</label>
-        <input type="text" id="partner-joint-feedback" placeholder="e.g., Hit all partner targets, great pace" />
-        <button onclick="savePartnerWorkout()">Log Partner Workout Session</button>
+      <h3 style="font-size: 1rem; color: var(--primary); margin-top: 10px;">Lift History Log</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Top Weight</th>
+              <th>Reps</th>
+              <th>Est. 1RM</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
       </div>
-    </div>
+    </section>
 
-    <!-- MUSCLE MAP TAB -->
-    <div id="muscle-tab" class="tab-content">
-      <div class="card">
-        <h2>Interactive Target Muscle Selector</h2>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Click any muscle zone below to load targeted exercises and structural roles.</p>
-        
-        <div class="muscle-interactive-container">
-          <svg width="240" height="260" viewBox="0 0 240 260">
-            <rect class="muscle-zone" x="35" y="45" width="40" height="25" rx="5" onclick="selectMuscleZone('Deltoids')" />
-            <rect class="muscle-zone" x="165" y="45" width="40" height="25" rx="5" onclick="selectMuscleZone('Deltoids')" />
-            <rect class="muscle-zone" x="80" y="45" width="80" height="30" rx="4" onclick="selectMuscleZone('Chest')" />
-            <text x="120" y="64" class="muscle-label">CHEST</text>
-            <rect class="muscle-zone" x="30" y="75" width="35" height="40" rx="4" onclick="selectMuscleZone('Biceps')" />
-            <text x="47" y="98" class="muscle-label">ARMS</text>
-            <rect class="muscle-zone" x="175" y="75" width="35" height="40" rx="4" onclick="selectMuscleZone('Triceps')" />
-            <text x="192" y="98" class="muscle-label">ARMS</text>
-            <rect class="muscle-zone" x="70" y="80" width="100" height="35" rx="4" onclick="selectMuscleZone('Lats')" />
-            <text x="120" y="101" class="muscle-label">LATS / BACK</text>
-            <rect class="muscle-zone" x="70" y="120" width="100" height="35" rx="4" onclick="selectMuscleZone('Gluteus')" />
-            <text x="120" y="141" class="muscle-label">GLUTES</text>
-            <rect class="muscle-zone" x="70" y="160" width="45" height="50" rx="4" onclick="selectMuscleZone('VMO')" />
-            <text x="92" y="188" class="muscle-label">VMO</text>
-            <rect class="muscle-zone" x="125" y="160" width="45" height="50" rx="4" onclick="selectMuscleZone('VMO')" />
-            <text x="147" y="188" class="muscle-label">QUADS</text>
-            <rect class="muscle-zone" x="70" y="215" width="100" height="35" rx="4" onclick="selectMuscleZone('Hamstrings')" />
-            <text x="120" y="236" class="muscle-label">HAMSTRINGS</text>
-          </svg>
-        </div>
+  </main>
 
-        <input type="text" id="muscle-search" onkeyup="filterMuscles()" placeholder="Or type to search (e.g., VMO, Glutes, Lats, Deltoids)..." />
-        <div id="muscle-list" style="margin-top: 16px;"></div>
-      </div>
-    </div>
-
-    <!-- MOVEMENT SWAP ENGINE TAB -->
-    <div id="swap-tab" class="tab-content">
-      <div class="card">
-        <h2>Joint-Friendly Movement Swap Engine</h2>
-        <label for="joint-focus">Select Area of Fatigue or Soreness</label>
-        <select id="joint-focus" onchange="renderSwaps()">
-          <option value="knee">Knees / Tibia-Fibula (Reduce Shear & Loading)</option>
-          <option value="back">Lower Back / Spine (Reduce Axial Load & Compression)</option>
-          <option value="shoulder">Shoulders / Rotator Cuff (Joint & Capsule Protection)</option>
-        </select>
-        <div id="swap-results" style="margin-top: 16px;"></div>
-      </div>
-    </div>
-
-    <!-- IDEAS & SUBMISSIONS TAB -->
-    <div id="ideas-tab" class="tab-content">
-      <div class="card">
-        <h2>💡 Submit New Idea (Workouts, Swaps & Clean Foods)</h2>
-        <div class="grid-2">
-          <div>
-            <label for="idea-author">Suggested By</label>
-            <select id="idea-author">
-              <option value="JT">JT</option>
-              <option value="Partner">Partner</option>
-            </select>
-          </div>
-          <div>
-            <label for="idea-category">Category</label>
-            <select id="idea-category">
-              <option value="workout">Workout Movement</option>
-              <option value="swap">Joint Swap Idea</option>
-              <option value="food">Clean Food / Recipe</option>
-            </select>
-          </div>
-        </div>
-
-        <label for="idea-title">Title / Name of Exercise or Food</label>
-        <input type="text" id="idea-title" placeholder="e.g., Trap Bar Shrugs or Bison Rice Bowl" />
-
-        <label for="idea-details">Details / Notes / Why add this?</label>
-        <textarea id="idea-details" rows="3" placeholder="Explain mechanics, joint benefit, or nutritional profile..."></textarea>
-
-        <button onclick="submitIdea()">Save Idea to Staging List</button>
-      </div>
-
-      <div class="card">
-        <h2>Staged Ideas Review Box</h2>
-        <div id="staged-ideas-list">No pending ideas staged.</div>
-      </div>
-    </div>
-
-    <!-- NUTRITION TAB -->
-    <div id="nutrition-tab" class="tab-content">
-      <div class="card">
-        <h2>Clean Eating & Whole Foods Search</h2>
-        <input type="text" id="food-search-bar" onkeyup="filterNutrition()" placeholder="Search clean foods (e.g., protein, carbs, joint health, recovery)..." />
-        <div id="nutrition-results" style="margin-top: 16px;"></div>
-      </div>
-    </div>
-
-    <!-- MACRO CALCULATOR TAB -->
-    <div id="macro-tab" class="tab-content">
-      <div class="card">
-        <h2>Dynamic Whole-Food Macro Calculator</h2>
-        
-        <div class="grid-2">
-          <div>
-            <label for="profile-gender">Gender</label>
-            <select id="profile-gender" onchange="calculateMacros()">
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          </div>
-          <div>
-            <label for="profile-weight">Weight (lbs)</label>
-            <input type="number" id="profile-weight" value="225" oninput="calculateMacros()" />
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div>
-            <label for="profile-feet">Height (Feet)</label>
-            <input type="number" id="profile-feet" value="6" oninput="calculateMacros()" />
-          </div>
-          <div>
-            <label for="profile-inches">Height (Inches)</label>
-            <input type="number" id="profile-inches" value="2" oninput="calculateMacros()" />
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div>
-            <label for="profile-age">Age</label>
-            <input type="number" id="profile-age" value="40" oninput="calculateMacros()" />
-          </div>
-          <div>
-            <label for="activity-level">Daily Activity Level</label>
-            <select id="activity-level" onchange="calculateMacros()">
-              <option value="1.375">Moderate Training (3-4 days/wk)</option>
-              <option value="1.55">Heavy Training (4-5 days/wk)</option>
-              <option value="1.2">Light Activity / Recovery Week</option>
-            </select>
-          </div>
-        </div>
-
-        <label for="macro-preset">Target Goal / Preset Ratio</label>
-        <select id="macro-preset" onchange="calculateMacros()">
-          <option value="hypertrophy">Hypertrophy & Strength (40% Carbs / 30% Protein / 30% Fat)</option>
-          <option value="balanced">Balanced Health (50% Carbs / 20% Protein / 30% Fat)</option>
-          <option value="low_carb">Low-Carb / Fat Loss (25% Carbs / 40% Protein / 35% Fat)</option>
-          <option value="keto">Keto / LCHF (5% Carbs / 25% Protein / 70% Fat)</option>
-        </select>
-
-        <div class="macro-display">
-          <div class="macro-box">
-            <div class="macro-val" id="macro-calories">2,785</div>
-            <div class="macro-lbl">Calories</div>
-          </div>
-          <div class="macro-box">
-            <div class="macro-val" id="macro-protein">209g</div>
-            <div class="macro-lbl">Protein</div>
-          </div>
-          <div class="macro-box">
-            <div class="macro-val" id="macro-carbs">279g</div>
-            <div class="macro-lbl">Carbs</div>
-          </div>
-          <div class="macro-box">
-            <div class="macro-val" id="macro-fats">93g</div>
-            <div class="macro-lbl">Fats</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LIBRARY TAB -->
-    <div id="library-tab" class="tab-content">
-      <div class="card">
-        <h2>Exercise & Technique Research</h2>
-        <input type="text" id="search-bar" onkeyup="filterLibrary()" placeholder="Search lifts (e.g., deadlift, trap bar, bench, pulldown, rdl)..." />
-        <div id="library-results" style="margin-top: 16px;"></div>
-      </div>
-    </div>
-
-    <!-- HISTORY / ANALYTICS TAB -->
-    <div id="history-tab" class="tab-content">
-      <div class="card">
-        <h2>Performance Visualizer</h2>
-        <canvas id="progressChart" width="400" height="200"></canvas>
-      </div>
-      <div class="card">
-        <h2>Logged Sessions History</h2>
-        <div id="history-list">No sessions logged yet.</div>
-      </div>
-    </div>
-  </div>
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <script>
-    const workouts = {
-      // ARNOLD SPLIT ROUTINES (JOINT-FRIENDLY HYPERTROPHY)
-      arnold_chest_back: [
-        { name: "Incline DB Bench Press (30°)", setsReps: "4 x 8-10", rest: "90 sec", notes: "Main Lift: Antagonist superset pair 1. Elbows at 45°." },
-        { name: "Chest-Supported DB Row", setsReps: "4 x 8-10", rest: "90 sec", notes: "Main Lift: Pair with Incline Press. Zero lower back stress." },
-        { name: "Flat DB Flyes (Slight Bend at Elbows)", setsReps: "3 x 10-12", rest: "75 sec", notes: "Main Lift: Antagonist superset pair 2. Deep chest stretch." },
-        { name: "Neutral-Grip Lat Pulldowns", setsReps: "3 x 10-12", rest: "75 sec", notes: "Main Lift: Pair with DB Flyes. Drive elbows to hips." },
-        { name: "Low Cable Chest Crossovers", setsReps: "3 x 12-15", rest: "60 sec", notes: "Accessory: Continuous tension on upper/inner chest." },
-        { name: "Straight-Arm Cable Pulldowns", setsReps: "3 x 12-15", rest: "60 sec", notes: "Accessory: Isolate lats without shoulder impingement." }
-      ],
-      arnold_shoulders_arms: [
-        { name: "Seated DB Shoulder Press", setsReps: "4 x 8-10", rest: "90 sec", notes: "Main Lift: Seated position removes lower back loading." },
-        { name: "Cable Rope Face Pulls", setsReps: "4 x 12-15", rest: "60 sec", notes: "Main Lift: Upper back and rear delt integrity." },
-        { name: "DB Incline Bicep Curls", setsReps: "3 x 10-12", rest: "60 sec", notes: "Arm Superset 1: Deep stretch on the long head." },
-        { name: "Tricep Rope Pushdowns", setsReps: "3 x 10-12", rest: "60 sec", notes: "Arm Superset 1: Constant cable tension, protect elbows." },
-        { name: "EZ-Bar or DB Hammer Curls", setsReps: "3 x 12", rest: "60 sec", notes: "Arm Superset 2: Targets brachialis and forearms." },
-        { name: "Overhead DB / Cable Tricep Extension", setsReps: "3 x 12", rest: "60 sec", notes: "Arm Superset 2: Full tricep long head expansion." }
-      ],
-      arnold_legs_core: [
-        { name: "Trap Bar Deadlift", setsReps: "4 x 6-8", rest: "2 min", notes: "Main Lift: Upright stance protects spine & femurs." },
-        { name: "Heel-Elevated Goblet Squats", setsReps: "3 x 10-12", rest: "90 sec", notes: "Main Lift: VMO quad emphasis with smooth knee tracking." },
-        { name: "DB Romanian Deadlifts (RDL)", setsReps: "3 x 10-12", rest: "75 sec", notes: "Main Lift: Hamstring hinge; feel stretch, keep bar close." },
-        { name: "Poliquin Step-Ups (or Reverse Lunges)", setsReps: "3 x 10 each", rest: "60 sec", notes: "Unilateral: Joint & knee tendon resilience." },
-        { name: "Standing Calf Raises (or Seated)", setsReps: "3 x 15", rest: "45 sec", notes: "Accessory: Ankle stability and lower leg strength." },
-        { name: "Pallof Press or Dead Bug", setsReps: "3 x 10 each", rest: "45 sec", notes: "Core: Anti-rotation stability without spinal flex." }
-      ],
-
-      // JT'S RESTART PROGRAM (HOME GYM 4-DAY SPLIT)
-      restart_d1: [
-        { name: "Flat DB Press", setsReps: "4 x 6-8", rest: "90 sec", notes: "Main Lift: Elbows at 45°, controlled descent." },
-        { name: "Cable Row (Neutral Grip)", setsReps: "4 x 6-8", rest: "90 sec", notes: "Main Lift: Squeeze at the hip, not the chest." },
-        { name: "Incline DB Press (30°)", setsReps: "3 x 8-10", rest: "75 sec", notes: "Main Lift: Upper chest focus." },
-        { name: "Wide Grip Pulldown", setsReps: "3 x 8-10", rest: "75 sec", notes: "Main Lift: Full stretch at top, don't rush." },
-        { name: "Face Pulls (Cable/Rope)", setsReps: "3 x 15", rest: "60 sec", notes: "Accessory: Rotator cuff and rear delt health." },
-        { name: "Overhead Tricep Extension (Rope)", setsReps: "3 x 12", rest: "60 sec", notes: "Accessory: Tricep long head stretch." },
-        { name: "Incline DB Curl", setsReps: "3 x 12", rest: "60 sec", notes: "Accessory: Full bicep elongation." }
-      ],
-      restart_d2: [
-        { name: "Trap Bar Deadlift", setsReps: "4 x 5-6", rest: "2 min", notes: "Main Lift: Hip hinge, chest up, drive through floor." },
-        { name: "Reverse Lunge (DB)", setsReps: "3 x 8 each", rest: "90 sec", notes: "Main Lift: Slow descent, knee tracks over toe." },
-        { name: "Romanian Deadlift (DB)", setsReps: "3 x 10", rest: "75 sec", notes: "Main Lift: Feel hamstring stretch, keep weight close." },
-        { name: "Seated Calf Raise", setsReps: "3 x 15", rest: "60 sec", notes: "Accessory: Soleus and ankle stability." },
-        { name: "Cable Pull-Through (Glutes)", setsReps: "3 x 15", rest: "60 sec", notes: "Accessory: Pure glute lockout without axial spine load." },
-        { name: "Dead Bug or Plank", setsReps: "3 x 30 sec", rest: "45 sec", notes: "Accessory: Core brace and trunk stability." }
-      ],
-      restart_d4: [
-        { name: "Cable Fly (Mid)", setsReps: "3 x 12-15", rest: "60 sec", notes: "Main Lift: Squeeze at center, slow eccentric." },
-        { name: "Angled Bar Row", setsReps: "4 x 10-12", rest: "60 sec", notes: "Main Lift: Elbow drives back, not out." },
-        { name: "DB Shoulder Press", setsReps: "3 x 10-12", rest: "60 sec", notes: "Main Lift: Natural wrist rotation." },
-        { name: "Cable Pulldown (Neutral)", setsReps: "3 x 12", rest: "60 sec", notes: "Main Lift: Lat squeeze." },
-        { name: "Preacher Curl", setsReps: "3 x 12", rest: "60 sec", notes: "Accessory: Strict bicep isolation." },
-        { name: "Tricep Rope Pushdown", setsReps: "3 x 15", rest: "60 sec", notes: "Accessory: Constant cable tension." },
-        { name: "Rear Delt Fly (DB)", setsReps: "3 x 15", rest: "60 sec", notes: "Accessory: Posterior shoulder integrity." }
-      ],
-      restart_d5: [
-        { name: "Cable Pull-Through", setsReps: "4 x 12-15", rest: "60 sec", notes: "Main Lift: Drive hips forward, squeeze glutes hard." },
-        { name: "DB Romanian Deadlift", setsReps: "3 x 12", rest: "60 sec", notes: "Main Lift: Controlled eccentric, feel hamstring stretch." },
-        { name: "Step-Up (DB or Bodyweight)", setsReps: "3 x 10 each", rest: "60 sec", notes: "Main Lift: Slow and controlled, no momentum." },
-        { name: "Leg Curl (Cable Attachment)", setsReps: "3 x 12-15", rest: "60 sec", notes: "Main Lift: Knee flexion focus." },
-        { name: "Seated Calf Raise", setsReps: "3 x 15", rest: "45 sec", notes: "Accessory: Lower leg resilience." },
-        { name: "Glute Bridge (Weighted)", setsReps: "3 x 15", rest: "60 sec", notes: "Accessory: Peak glute contraction." },
-        { name: "Pallof Press or Dead Bug", setsReps: "3 x 10 each side", rest: "45 sec", notes: "Accessory: Anti-rotation core strength." }
-      ],
-
-      // AUXILIARY TARGETED ROUTINES
-      quad_knee: [
-        { name: "Warm-Up: Tibialis Raises & Wall Sits", setsReps: "2 x 15", rest: "45 sec", notes: "Pre-activates VMO & protects knees" },
-        { name: "Heel-Elevated Goblet Squats", setsReps: "3 x 10-12", rest: "75 sec", notes: "Focuses quad sweep (VMO) without spinal load." },
-        { name: "Reverse Lunges (Front Foot Elevated)", setsReps: "3 x 8 each", rest: "75 sec", notes: "Quad isolation with minimal knee shear." },
-        { name: "Poliquin Step-Ups", setsReps: "3 x 12 each", rest: "60 sec", notes: "Knee rehab/strength over toes." },
-        { name: "Leg Extensions (3s Eccentric)", setsReps: "3 x 12", rest: "60 sec", notes: "Slow lowering phase for quad definition." }
-      ],
-      glute_posterior: [
-        { name: "Warm-Up: 90/90 Swivels & Glute Bridges", setsReps: "2 x 15", rest: "45 sec", notes: "Opens hips & pre-activates glute max" },
-        { name: "Barbell / DB Hip Thrusts", setsReps: "4 x 8-10", rest: "90 sec", notes: "Peak glute contraction, zero leg joint load." },
-        { name: "Single-Leg Romanian Deadlifts", setsReps: "3 x 10 each", rest: "75 sec", notes: "Glute/hamstring tie-in & knee stability." },
-        { name: "Cable Hip Abductions / Side Clamshells", setsReps: "3 x 15", rest: "60 sec", notes: "Upper glute (glute medius) width." },
-        { name: "Farmer's Suitcase Carry", setsReps: "3 x 40 yds", rest: "60 sec", notes: "Core integrity and lateral hip stability." }
-      ],
-      push_pull: [
-        { name: "Incline Dumbbell Bench Press", setsReps: "4 x 8-10", rest: "75 sec", notes: "Upper chest focus, shoulder-friendly neutral angle." },
-        { name: "Chest-Supported Row", setsReps: "4 x 8-10", rest: "75 sec", notes: "Full back hypertrophy without lower back strain." },
-        { name: "Standing Overhead DB Press", setsReps: "3 x 10", rest: "60 sec", notes: "Strict shoulder deltoid power." },
-        { name: "Neutral-Grip Lat Pulldowns", setsReps: "3 x 10-12", rest: "60 sec", notes: "V-taper lat width; pull elbows down to hips." }
-      ],
-      arm_blaster: [
-        { name: "Incline Dumbbell Bicep Curls", setsReps: "3 x 12", rest: "60 sec", notes: "Maximum stretch on long head of biceps." },
-        { name: "Tricep Parallel Dips (or Bench Dips)", setsReps: "3 x 10-12", rest: "60 sec", notes: "Heavy tricep horseshoe recruitment." },
-        { name: "EZ-Bar / DB Hammer Curls", setsReps: "3 x 12", rest: "60 sec", notes: "Targets brachialis for arm thickness & forearms." },
-        { name: "Rope Overhead Tricep Extensions", setsReps: "3 x 12-15", rest: "60 sec", notes: "Deep stretch on long head of triceps." }
-      ],
-      bootcamp: [
-        { name: "Kettlebell / DB Swings", setsReps: "4 x 15", rest: "45 sec", notes: "Explosive hip hinge conditioning." },
-        { name: "DB Goblet Thrusters", setsReps: "3 x 10", rest: "60 sec", notes: "Full-body metabolic output." },
-        { name: "Bodyweight Reverse Lunges to Knee Drive", setsReps: "3 x 10 each", rest: "45 sec", notes: "Unilateral cardio & stability." }
-      ],
-      stretch_yoga: [
-        { name: "World's Greatest Stretch", setsReps: "5 each side", rest: "30 sec", notes: "Spinal and hip opener." },
-        { name: "90/90 Hip Mobility", setsReps: "60 sec hold", rest: "30 sec", notes: "Opens deep glutes & hip rotators." },
-        { name: "Couch Stretch", setsReps: "60 sec each", rest: "30 sec", notes: "Relieves quad pull on kneecaps." }
-      ]
+    // Live Firebase Credentials
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlYo3gUuK6-NUqSegB4e2DNcYuh4K_zFw",
+      authDomain: "jt-performance-portal.firebaseapp.com",
+      projectId: "jt-performance-portal",
+      storageBucket: "jt-performance-portal.firebasestorage.app",
+      messagingSenderId: "514340641320",
+      appId: "1:514340641320:web:8bf0253ea4cecc2249f31d",
+      measurementId: "G-YWK8GLJ149"
     };
 
-    const partnerWorkouts = {
-      partner_burn: [
-        { name: "Synchronized Air Squats & High-Five Lockout", notes: "Teamwork: Squat together in sync, high-five at the top of every rep." },
-        { name: "Partner I-Go-You-Go Kettlebell / DB Swings", notes: "Teamwork: One person performs swings while partner holds plank." },
-        { name: "Medicine Ball / Light DB Rotational Passes", notes: "Teamwork: Sit back-to-back, pass weight cleanly around torso." },
-        { name: "Partner High-Ten Plank Taps & Cardio Finisher", notes: "Teamwork: Plank high-taps followed by cardio effort." }
-      ],
-      partner_foundations: [
-        { name: "Barbell / Dumbbell Deadlift", notes: "Coaching: Feet hip-width, chest up, pull through heels." },
-        { name: "Barbell / Dumbbell Bench Press", notes: "Coaching: Feet flat, shoulders back, lower under control." },
-        { name: "Assisted Pull-Ups (Band or Spotter)", notes: "Coaching: Drive elbows down to side pockets." },
-        { name: "Parallel Dips (or Bench Dips)", notes: "Coaching: Control lower phase to 90 degrees." }
-      ],
-      partner_upper_lower: [
-        { name: "Heel-Elevated Goblet Squats", notes: "Coaching: Torso upright, knees track over toes." },
-        { name: "Chest-Supported Rows", notes: "Coaching: Lead with elbows, hold 1-sec squeeze." },
-        { name: "DB Walking Lunges", notes: "Coaching: 90-degree angle at front knee joint." },
-        { name: "JT & Partner Plank High-Fives", notes: "Coaching: Solid core brace, zero hip twist." }
-      ]
-    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    const muscleDatabase = [
-      { name: "VMO (Vastus Medialis Obliquus)", location: "Front Thigh (Teardrop Muscle Above Inner Kneecap)", function: "Keeps kneecap centered in groove, protects knee joint integrity.", exercises: ["Heel-Elevated Goblet Squat", "Poliquin Step-Up", "Terminal Knee Extension (TKE)"] },
-      { name: "Gluteus Maximus & Medius", location: "Hips & Buttocks", function: "Drives hip extension, stabilizes hips to prevent knee collapse.", exercises: ["Trap Bar Deadlift", "Barbell / DB Hip Thrust", "Cable Pull-Through", "Reverse Lunge"] },
-      { name: "Latissimus Dorsi (Lats)", location: "Upper / Mid Back (Sides)", function: "Creates upper back width, pulls arms down and back, protects spine.", exercises: ["Wide Grip Pulldown", "Cable Row (Neutral Grip)", "Angled Bar Row"] },
-      { name: "Deltoids (Anterior, Lateral, Posterior)", location: "Shoulder Caps", function: "Arm elevation, shoulder stability, creating rounded upper body width.", exercises: ["DB Shoulder Press", "Cable Fly (Mid)", "Rear Delt Fly (DB)", "Face Pulls"] },
-      { name: "Hamstrings (Biceps Femoris)", location: "Back of Thighs", function: "Knee flexion, hip extension, balances quad strength to stabilize knee joint.", exercises: ["Romanian Deadlifts (RDL)", "Leg Curl (Cable)", "Trap Bar Deadlift"] },
-      { name: "Pectoralis Major (Chest)", location: "Front Chest", function: "Horizontal arm adduction & pressing strength.", exercises: ["Flat DB Press", "Incline DB Press (30°)", "Cable Fly (Mid)"] },
-      { name: "Triceps Brachii", location: "Back of Upper Arms", function: "Elbow extension and lock-out strength.", exercises: ["Overhead Tricep Extension (Rope)", "Tricep Rope Pushdown", "Parallel Dips"] },
-      { name: "Biceps & Brachialis", location: "Front of Upper Arms", function: "Elbow flexion, forearm supination, pulling grip.", exercises: ["Incline DB Curl", "Preacher Curl", "EZ-Bar Hammer Curl"] }
-    ];
+    let performanceChart = null;
 
-    const swapDatabase = {
-      knee: [
-        { original: "Standard Barbell Back Squat", substitute: "Heel-Elevated Goblet Squat / Trap Bar Deadlift", reason: "Reduces shear stress on tibia/fibula while keeping torso upright." },
-        { original: "Forward Walking Lunges", substitute: "DB Reverse Lunges (Front Foot Elevated)", reason: "Eliminates forward decelerating forces on the patellar tendon." },
-        { original: "Heavy Open-Chain Leg Extensions", substitute: "Poliquin Step-Ups / TKE Band Pulls", reason: "Builds VMO and knee tendon resilience through controlled over-the-toe drive." },
-        { original: "Heavy Leg Press", substitute: "Cable Pull-Through / DB RDL", reason: "Trains lower body posterior power with zero compressive force on knee joints." }
-      ],
-      back: [
-        { original: "Standing Bent-Over Barbell Rows", substitute: "Chest-Supported DB Rows / Cable Row", reason: "Provides zero lumbar loading while allowing maximum back lat recruitment." },
-        { original: "Standing Overhead Barbell Press", substitute: "Seated DB Overhead Press", reason: "Removes lower back hyperextension under heavy overhead loading." },
-        { original: "Conventional Heavy Deadlift", substitute: "Trap Bar Deadlift", reason: "Allows a more upright torso, significantly reducing lumbar shear force." }
-      ],
-      shoulder: [
-        { original: "Barbell Flat Bench Press", substitute: "Flat DB Press (45° Elbow Angle)", reason: "Prevents impingement by keeping shoulder blades locked in a natural position." },
-        { original: "Behind-the-Neck Pulldowns", substitute: "Wide Grip / Neutral Cable Pulldowns", reason: "Eliminates rotator cuff strain while maximizing lat recruitment." },
-        { original: "Upright Rows", substitute: "Cable Rope Face Pulls", reason: "Replaces internal rotation with rotator cuff strengthening." }
-      ]
-    };
-
-    let cleanFoods = [
-      { name: "Grass-Fed Extra Lean Beef & Turkey Breast", category: "Protein", role: "Muscle Growth & Zinc", desc: "Whole red meat and poultry options providing bioavailable iron and essential amino acids." },
-      { name: "Wild Alaskan Salmon & Sardines", category: "Protein & Healthy Fats", role: "Anti-Inflammatory & Joints", desc: "Rich in EPA and DHA Omega-3 fatty acids that lower systemic joint inflammation." },
-      { name: "Pasture-Raised Whole Eggs", category: "Protein & Fats", role: "Hormones & Cell Recovery", desc: "Contains complete amino acids alongside choline and healthy saturated fat precursors." },
-      { name: "Sweet Potatoes & Yams", category: "Complex Carbs", role: "Glycogen & Potassium", desc: "Slow-digesting carbohydrate sources high in fiber to keep energy consistent." },
-      { name: "Steamed White Jasmine & Basmati Rice", category: "Fast Carbs", role: "Post-Workout Glycogen", desc: "Clean, easily digestible carbohydrate options for immediate muscle recovery." }
-    ];
-
-    const exerciseLibrary = [
-      { name: "Trap Bar Deadlift", target: "Glutes, Hamstrings, Quadriceps, Lower Back", setup: "Stand inside the frame, grip handles centrally, hinge at hips, keep chest high.", safety: "Spinal neutral alignment, avoid hip hyperextension at top lockout." },
-      { name: "Heel-Elevated Goblet Squat", target: "VMO (Vastus Medialis Obliquus), Quads", setup: "Elevate heels 1-2 inches on a small wedge/plate, hold dumbbell vertically at chest.", safety: "Drive knees in line with toes, maintain vertical torso to eliminate lower back load." },
-      { name: "Incline DB Press (30°)", target: "Upper Pectoralis Major, Anterior Deltoids", setup: "Set bench angle to 30 degrees, tuck elbows at 45 degrees.", safety: "Avoid flaring elbows 90 degrees out to protect anterior shoulder capsule." },
-      { name: "Chest-Supported DB Row", target: "Latissimus Dorsi, Rhomboids, Rear Delts", setup: "Lie face down on an incline bench, pull DBs toward hip crease.", safety: "Eliminates lower back axial compression entirely during pull reps." }
-    ];
-
-    let stagedIdeas = [];
-    let loggedHistory = [];
-
-    function switchTab(tabId, el) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      if(el) el.classList.add('active');
-      if (tabId === 'history-tab') renderChart();
+    // Epley Formula for Safe Estimated 1RM
+    function calculateE1RM(weight, reps) {
+      if (!weight || !reps) return 0;
+      if (Number(reps) === 1) return Number(weight);
+      return Math.round(Number(weight) * (1 + Number(reps) / 30));
     }
 
-    function renderWorkout() {
-      const selectedKey = document.getElementById('workout-select').value;
-      const energy = document.getElementById('energy-status').value;
-      let routine = workouts[selectedKey] || [];
-      if (energy === 'condensed') {
-        routine = routine.slice(0, 3);
+    // Submit New Session to Firestore
+    async function handleWorkoutSubmit(e) {
+      e.preventDefault();
+      const exerciseName = document.getElementById('logExercise').value;
+      const weight = Number(document.getElementById('logWeight').value);
+      const reps = Number(document.getElementById('logReps').value);
+
+      try {
+        await db.collection("workout_history").add({
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          exercises: [
+            {
+              name: exerciseName,
+              sets: [{ weight: weight, reps: reps }]
+            }
+          ]
+        });
+
+        alert("Workout logged successfully!");
+        document.getElementById('workoutForm').reset();
+        renderExerciseTrend();
+      } catch (err) {
+        console.error("Error logging workout: ", err);
+        alert("Failed to log workout: " + err.message);
       }
-      let html = '';
-      routine.forEach((ex, idx) => {
-        html += `
-          <div class="exercise-group">
-            <div class="exercise-title">${ex.name}</div>
-            <div class="exercise-notes">${ex.notes}</div>
-            <div class="grid-2" style="margin-top:8px;">
-              <div>
-                <label>Target Structure</label>
-                <input type="text" value="${ex.setsReps} (Rest: ${ex.rest})" readonly style="color:var(--text-muted);" />
-              </div>
-              <div>
-                <label>Weight & Performance Logged</label>
-                <input type="text" id="ex-val-${idx}" placeholder="e.g. 55 lbs x 10, 10, 8" />
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      document.getElementById('workout-content').innerHTML = html;
     }
 
-    function saveWorkout() {
-      const selectedKey = document.getElementById('workout-select').value;
-      const feedback = document.getElementById('joint-feedback').value;
-      const timestamp = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      
-      const logEntry = {
-        date: timestamp,
-        routine: selectedKey,
-        notes: feedback || "No joint pain notes entered."
-      };
-      
-      loggedHistory.unshift(logEntry);
-      alert("Workout successfully saved to local analytics!");
-      document.getElementById('joint-feedback').value = '';
-      renderHistory();
-    }
+    // Render Chart.js Trend and Detail Table
+    async function renderExerciseTrend() {
+      const selectedExercise = document.getElementById('exerciseSelect').value;
+      const historyTableBody = document.getElementById('historyTableBody');
+      historyTableBody.innerHTML = '';
 
-    function renderPartnerWorkout() {
-      const selectedKey = document.getElementById('partner-select').value;
-      const partnerName = document.getElementById('partner-name').value || "Partner";
-      let routine = partnerWorkouts[selectedKey] || [];
-      let html = '';
-      routine.forEach((ex, idx) => {
-        html += `
-          <div class="exercise-group">
-            <div class="exercise-title">${ex.name}</div>
-            <div class="exercise-notes">${ex.notes}</div>
-            <div class="person-header person-jt">JT Track</div>
-            <input type="text" id="p-jt-${idx}" placeholder="Weight / Reps logged by JT" />
-            <div class="person-header person-partner">${partnerName} Track</div>
-            <input type="text" id="p-partner-${idx}" placeholder="Weight / Reps logged by ${partnerName}" />
-          </div>
-        `;
-      });
-      document.getElementById('partner-workout-content').innerHTML = html;
-    }
+      const dates = [];
+      const topWeights = [];
+      const estimated1RMs = [];
 
-    function savePartnerWorkout() {
-      alert("Partner Workout logged!");
-    }
+      try {
+        const snapshot = await db.collection("workout_history")
+          .orderBy("timestamp", "asc")
+          .get();
 
-    function selectMuscleZone(muscleName) {
-      document.getElementById('muscle-search').value = muscleName;
-      filterMuscles();
-    }
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (!data.exercises || !data.timestamp) return;
 
-    function filterMuscles() {
-      const query = document.getElementById('muscle-search').value.toLowerCase();
-      const results = muscleDatabase.filter(m => m.name.toLowerCase().includes(query) || m.location.toLowerCase().includes(query) || m.function.toLowerCase().includes(query));
-      let html = '';
-      results.forEach(m => {
-        html += `
-          <div class="muscle-card">
-            <div class="muscle-name">${m.name}</div>
-            <div class="muscle-location">📍 ${m.location}</div>
-            <p style="font-size:0.8rem; margin: 4px 0;"><strong>Role:</strong> ${m.function}</p>
-            <p style="font-size:0.75rem; color:var(--accent); margin: 4px 0;"><strong>Key Movements:</strong> ${m.exercises.join(', ')}</p>
-          </div>
-        `;
-      });
-      document.getElementById('muscle-list').innerHTML = html;
-    }
+          const exerciseData = data.exercises.find(e => e.name === selectedExercise);
+          
+          if (exerciseData && exerciseData.sets && exerciseData.sets.length > 0) {
+            const dateStr = new Date(data.timestamp.toDate()).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            });
+            
+            const maxWeight = Math.max(...exerciseData.sets.map(s => Number(s.weight) || 0));
+            const bestSet = exerciseData.sets.find(s => Number(s.weight) === maxWeight) || exerciseData.sets[0];
+            const e1rm = calculateE1RM(maxWeight, bestSet.reps);
 
-    function renderSwaps() {
-      const area = document.getElementById('joint-focus').value;
-      const swaps = swapDatabase[area] || [];
-      let html = '';
-      swaps.forEach(s => {
-        html += `
-          <div class="exercise-group">
-            <div style="font-size:0.85rem; color:var(--danger); font-weight:bold;">Avoid / Replace: ${s.original}</div>
-            <div style="font-size:0.95rem; color:var(--success); font-weight:bold; margin-top:4px;">✔ Safer Swap: ${s.substitute}</div>
-            <div class="exercise-notes" style="margin-top:6px;"><strong>Biomechanics Context:</strong> ${s.reason}</div>
-          </div>
-        `;
-      });
-      document.getElementById('swap-results').innerHTML = html;
-    }
+            dates.push(dateStr);
+            topWeights.push(maxWeight);
+            estimated1RMs.push(e1rm);
 
-    function submitIdea() {
-      const author = document.getElementById('idea-author').value;
-      const category = document.getElementById('idea-category').value;
-      const title = document.getElementById('idea-title').value;
-      const details = document.getElementById('idea-details').value;
-
-      if(!title) { alert("Please enter a title."); return; }
-
-      stagedIdeas.push({ author, category, title, details });
-      document.getElementById('idea-title').value = '';
-      document.getElementById('idea-details').value = '';
-      renderStagedIdeas();
-    }
-
-    function renderStagedIdeas() {
-      if(stagedIdeas.length === 0) {
-        document.getElementById('staged-ideas-list').innerHTML = 'No pending ideas staged.';
-        return;
-      }
-      let html = '';
-      stagedIdeas.forEach((item, idx) => {
-        html += `
-          <div class="item-card">
-            <span class="tag ${item.author === 'JT' ? '' : 'tag-partner'}">${item.author}</span>
-            <span class="tag tag-purple">${item.category}</span>
-            <div style="font-weight:bold; margin-top:6px; font-size:0.95rem;">${item.title}</div>
-            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">${item.details}</div>
-          </div>
-        `;
-      });
-      document.getElementById('staged-ideas-list').innerHTML = html;
-    }
-
-    function filterNutrition() {
-      const query = document.getElementById('food-search-bar').value.toLowerCase();
-      const results = cleanFoods.filter(f => f.name.toLowerCase().includes(query) || f.category.toLowerCase().includes(query) || f.role.toLowerCase().includes(query));
-      let html = '';
-      results.forEach(f => {
-        html += `
-          <div class="exercise-group">
-            <div class="exercise-title">${f.name}</div>
-            <span class="tag tag-green">${f.category}</span>
-            <span class="tag tag-warn">${f.role}</span>
-            <div class="exercise-notes" style="margin-top:6px;">${f.desc}</div>
-          </div>
-        `;
-      });
-      document.getElementById('nutrition-results').innerHTML = html;
-    }
-
-    function calculateMacros() {
-      const weight = parseFloat(document.getElementById('profile-weight').value) || 225;
-      const feet = parseFloat(document.getElementById('profile-feet').value) || 6;
-      const inches = parseFloat(document.getElementById('profile-inches').value) || 2;
-      const age = parseFloat(document.getElementById('profile-age').value) || 40;
-      const gender = document.getElementById('profile-gender').value;
-      const activity = parseFloat(document.getElementById('activity-level').value);
-      const preset = document.getElementById('macro-preset').value;
-
-      const heightInCm = ((feet * 12) + inches) * 2.54;
-      const weightInKg = weight * 0.453592;
-
-      let bmr = 0;
-      if (gender === 'male') {
-        bmr = (10 * weightInKg) + (6.25 * heightInCm) - (5 * age) + 5;
-      } else {
-        bmr = (10 * weightInKg) + (6.25 * heightInCm) - (5 * age) - 161;
-      }
-
-      const tdee = Math.round(bmr * activity);
-
-      let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
-      if (preset === 'balanced') { pRatio = 0.2; cRatio = 0.5; fRatio = 0.3; }
-      else if (preset === 'low_carb') { pRatio = 0.4; cRatio = 0.25; fRatio = 0.35; }
-      else if (preset === 'keto') { pRatio = 0.25; cRatio = 0.05; fRatio = 0.7; }
-
-      const proteinGrams = Math.round((tdee * pRatio) / 4);
-      const carbGrams = Math.round((tdee * cRatio) / 4);
-      const fatGrams = Math.round((tdee * fRatio) / 9);
-
-      document.getElementById('macro-calories').innerText = tdee.toLocaleString();
-      document.getElementById('macro-protein').innerText = proteinGrams + 'g';
-      document.getElementById('macro-carbs').innerText = carbGrams + 'g';
-      document.getElementById('macro-fats').innerText = fatGrams + 'g';
-    }
-
-    function filterLibrary() {
-      const query = document.getElementById('search-bar').value.toLowerCase();
-      const results = exerciseLibrary.filter(e => e.name.toLowerCase().includes(query) || e.target.toLowerCase().includes(query));
-      let html = '';
-      results.forEach(e => {
-        html += `
-          <div class="exercise-group">
-            <div class="exercise-title">${e.name}</div>
-            <div style="font-size:0.75rem; color:var(--accent); margin-top:2px;">Target: ${e.target}</div>
-            <div class="exercise-notes" style="margin-top:4px;"><strong>Setup:</strong> ${e.setup}</div>
-            <div class="exercise-notes" style="margin-top:2px; color:var(--warning);"><strong>Safety Cue:</strong> ${e.safety}</div>
-          </div>
-        `;
-      });
-      document.getElementById('library-results').innerHTML = html;
-    }
-
-    function renderHistory() {
-      if(loggedHistory.length === 0) {
-        document.getElementById('history-list').innerHTML = "No sessions logged yet.";
-        return;
-      }
-      let html = '';
-      loggedHistory.forEach(h => {
-        html += `
-          <div class="log-item">
-            <div class="log-date">${h.date} — Routine: ${h.routine}</div>
-            <div>Joint Notes: ${h.notes}</div>
-          </div>
-        `;
-      });
-      document.getElementById('history-list').innerHTML = html;
-    }
-
-    let myChart = null;
-    function renderChart() {
-      const ctx = document.getElementById('progressChart').getContext('2d');
-      if (myChart) myChart.destroy();
-      myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-          datasets: [{
-            label: 'Volume Index (Load x Reps)',
-            data: [12000, 13200, 14100, 13800, 15200],
-            borderColor: '#38bdf8',
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { labels: { color: '#f8fafc' } } },
-          scales: {
-            x: { ticks: { color: '#94a3b8' } },
-            y: { ticks: { color: '#94a3b8' } }
+            const row = `
+              <tr>
+                <td>${dateStr}</td>
+                <td class="weight-col">${maxWeight} lbs</td>
+                <td>${bestSet.reps}</td>
+                <td class="e1rm-col">${e1rm} lbs</td>
+              </tr>
+            `;
+            historyTableBody.innerHTML += row;
           }
+        });
+
+        // Destroy prior chart instance before re-drawing
+        if (performanceChart) {
+          performanceChart.destroy();
         }
-      });
+
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        performanceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [
+              {
+                label: 'Top Weight (lbs)',
+                data: topWeights,
+                borderColor: '#38bdf8',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                borderWidth: 3,
+                pointRadius: 4,
+                tension: 0.3,
+                fill: true
+              },
+              {
+                label: 'Est. 1RM Trend (lbs)',
+                data: estimated1RMs,
+                borderColor: '#4ade80',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointRadius: 3,
+                tension: 0.3,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#94a3b8' } }
+            },
+            scales: {
+              x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+              y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error("Error loading analytics: ", error);
+      }
     }
 
-    // Initialize Default States
-    renderWorkout();
-    renderPartnerWorkout();
-    filterMuscles();
-    renderSwaps();
-    filterNutrition();
-    calculateMacros();
-    filterLibrary();
+    // Initialize PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+
+    // Load initial trend on page startup
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(renderExerciseTrend, 800);
+    });
   </script>
 </body>
 </html>
